@@ -23,13 +23,11 @@ var logger = require('./logger.js');
 var polyInt = require('./polyglot_interface.js')
 
 if (MQTT) {
-	// Use for MQTT interface to polyglot
 	var mqtt = require('mqtt')
 
 	var client = mqtt.connect('mqtt://'+mqtt_server+':'+mqtt_port, {
 		keepalive: 10,
 		clean: true,
-		// Make this the nodeserver name you specified when you created the nodeserver in polyglot
 		clientId: servername
 	})
 
