@@ -1,21 +1,21 @@
 {
     "name": "TestNodeJS",
-    "docs": "https://www.nest.com",
+    "docs": "https://github.com/Einstein42/nodejs_nodeserver",
     "type": "node",
     "executable": "nodetest.js",
-    "description": "Test NodeJS integration.",
+    "description": "NodeJS Nodeserver for Polyglot by UDI",
     "notice": "",
     "interface": "mqtt",
     "mqtt_server": "pi3",
     "mqtt_port": "1883",
     "credits": [
         {
-            "title": "NodeJS Nodeserver test",
+            "title": "NodeJS Nodeserver",
             "author": "James Milne (Einstein.42)",
             "version": "0.1.0",
             "date": "Nov 9th, 2016",
-            "source": "https://github.com/Einstein42/",
-            "license": "https://github.com/Einstein42/"
+            "source": "https://github.com/Einstein42/nodejs_nodeserver",
+            "license": "https://github.com/Einstein42/nodejs_nodeserver"
         }
     ]
 }
