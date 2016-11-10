@@ -15,7 +15,7 @@
             "version": "0.1.0",
             "date": "Nov 9th, 2016",
             "source": "https://github.com/Einstein42/nodejs_nodeserver",
-            "license": "https://github.com/Einstein42/nodejs_nodeserver"
+            "license": "https://github.com/Einstein42/nodejs_nodeserver/blob/master/LICENSE"
         }
     ]
 }
