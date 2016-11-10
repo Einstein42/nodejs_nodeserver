@@ -1,0 +1,21 @@
+{
+    "name": "TestNodeJS",
+    "docs": "https://www.nest.com",
+    "type": "node",
+    "executable": "nodetest.js",
+    "description": "Test NodeJS integration.",
+    "notice": "",
+    "interface": "mqtt",
+    "mqtt_server": "pi3",
+    "mqtt_port": "1883",
+    "credits": [
+        {
+            "title": "NodeJS Nodeserver test",
+            "author": "James Milne (Einstein.42)",
+            "version": "0.1.0",
+            "date": "Nov 9th, 2016",
+            "source": "https://github.com/Einstein42/",
+            "license": "https://github.com/Einstein42/"
+        }
+    ]
+}
