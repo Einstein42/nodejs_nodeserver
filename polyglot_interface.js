@@ -1,10 +1,14 @@
 /*
-Parse and respond to Polyglot Interface using STDIN and STDOUT
+Parse and respond to Polyglot Interface using STDIN and STDOUT or MQTT
 */
 
 var logger = require('./logger.js');
 
-var parseIn = function(json, mqtt, name) {
+function parseIn(json, mqtt, name) {
+	this.json = JSON.parse(json)
+	this.mqtt = mqtt
+	this.name = name
+
 	var input = {
 		'params': doParams,
 		'exit': doExit,
@@ -24,7 +28,6 @@ var parseIn = function(json, mqtt, name) {
 		'statistics': doStatistics,
 		'notfound': doNotFound,
 	}
-	var json = JSON.parse(json);
 	for (var prop in json) {
 		if (json.hasOwnProperty(prop)) {
 				(input[prop] || input['notfound'])(json[prop], mqtt, name, prop);
