@@ -4,118 +4,109 @@ Parse and respond to Polyglot Interface using STDIN and STDOUT or MQTT
 
 var logger = require('./logger.js');
 
-function parseIn(json, mqtt, name) {
+var poly = function() {}
+poly.prototype.parseIn = function(json, mqtt, name) {
 	this.json = JSON.parse(json)
 	this.mqtt = mqtt
 	this.name = name
-
-	var input = {
-		'params': doParams,
-		'exit': doExit,
-		'ping': doPing,
-		'config': doConfig,
-		'install': doInstall,
-		'query': doQuery,
-		'status': doStatus,
-		'add_all': doAddAll,
-		'added': doAdded,
-		'removed': doRemoved,
-		'renamed': doRenamed,
-		'enabled': doEnabled,
-		'disabled': doDisabled,
-		'cmd': doCmd,
-		'result': doResult,
-		'statistics': doStatistics,
-		'notfound': doNotFound,
-	}
-	for (var prop in json) {
-		if (json.hasOwnProperty(prop)) {
-				(input[prop] || input['notfound'])(json[prop], mqtt, name, prop);
+	for (var prop in this.json) {
+		if (this.json.hasOwnProperty(prop)) {
+			(this[prop] || this['notfound'])(this, this.json[prop], prop)
 		}
 		else {
-			logger.debug('Property not found in input: ' + json);
+			logger.debug('Property not found in input: ' + json)
 		}
-	};
-};
-
-function doParams(params, mqtt, name) {
-		logger.transports.file.filename = params.sandbox + '/debug.log';
-		logger.info('Received Params from Polyglot: ', params);
-}
-
-function _mk_cmd(json, mqtt, name) {
-	if (!mqtt) {
-		console.log(JSON.stringify(json))
-	} else {
-		mqtt.publish('udi/polyglot/'+name+'/poly', JSON.stringify(json), { retain: false })
 	}
 }
 
-function doExit(json, mqtt, name) {
+poly.prototype.connected = function(self, data, prop) {
+	logger.info('Got connected')
+}
+
+poly.prototype.disconnected = function(self, data, prop)  {
+	logger.info('Got disconnected')
+}
+
+poly.prototype.params = function(self, data, prop) {
+		logger.transports.file.filename = data.sandbox + '/debug.log';
+		logger.info('Received Params from Polyglot: ', data)
+}
+
+poly.prototype._mk_cmd = function(msg) {
+	if (!this.mqtt) {
+		console.log(JSON.stringify(msg))
+	} else {
+		this.mqtt.publish('udi/polyglot/'+this.name+'/poly', JSON.stringify(msg), { retain: false })
+	}
+}
+
+poly.prototype.exit = function(self, data, prop) {
 	logger.info('Shutting down per Polyglot Request');
-	mqtt.end();
+	if (!self.mqtt) {
+		self.mqtt.end();		
+	}
 	process.exit();
 }
 
-function doPing(json, mqtt, name) {
-	var output = {'pong' : {}};
-	_mk_cmd(output, mqtt, name)
-}
-
-function doConfig(json, mqtt, name) {
+poly.prototype.config = function(self, data) {
 	logger.info('Did config');
 }
 
-function doInstall(json, mqtt, name) {
+poly.prototype.install = function(self, data) {
 	logger.info('Did install');
 }
 
-function doQuery(json, mqtt, name) {
+poly.prototype.query = function(self, data) {
 	logger.info('Did Query');
 }
 
-function doStatus(json, mqtt, name) {
+poly.prototype.status = function(self, data) {
 	logger.info('Did Status');
 }
 
-function doAddAll(json, mqtt, name) {
+poly.prototype.add_all = function(self, data) {
 	logger.info('Did AddAll');
 }
 
-function doAdded(json, mqtt, name) {
+poly.prototype.added = function(self, data) {
 	logger.info('Did Added');
 }
 
-function doRemoved(json, mqtt, name) {
+poly.prototype.removed = function(self, data) {
 	logger.info('Did Removed');
 }
 
-function doRenamed(json, mqtt, name) {
+poly.prototype.renamed = function(self, data) {
 	logger.info('Did Renamed');
 }
 
-function doEnabled(json, mqtt, name) {
+poly.prototype.enabled = function(self, data) {
 	logger.info('Did Enabled');
 }
 
-function doDisabled(json, mqtt, name) {
+poly.prototype.disabled = function(self, data) {
 	logger.info('Did Disabled');
 }
 
-function doCmd(json, mqtt, name) {
+poly.prototype.cmd = function(self, data) {
 	logger.info('Did Cmd');
 }
 
-function doResult(json, mqtt, name) {
+poly.prototype.result = function(self, data) {
 	logger.info('Did Result');
 }
 
-function doStatistics(json, mqtt, name) {
+poly.prototype.statistics = function(self, data) {
 	logger.info('Did Statistics');
 }
 
-function doNotFound(json, mqtt, name, prop) {
-	logger.info("Command not found: " + prop, json);
+poly.prototype.notfound = function(self, data, command) {
+	logger.info("Command not found: " + command, data);
 }
 
-module.exports.parseIn = parseIn;
+poly.prototype.ping = function(self, data, prop) {
+	var response = {'pong': {}}
+	self._mk_cmd(response)
+}
+
+module.exports.poly = poly

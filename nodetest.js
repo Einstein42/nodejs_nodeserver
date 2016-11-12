@@ -51,7 +51,8 @@ if (MQTT) {
 	})
 	client.on('message', (topic, message) => {
 		logger.info('MQTT Message: ' + topic + ": " + message.toString())
-		polyInt.parseIn(message.toString(), client, servername)
+		var poly = new polyInt.poly()
+		poly.parseIn(message.toString(), client, servername)
 	})
 	client.on('reconnect', () => {
 		logger.info('MQTT attempting reconnection to broker...')
@@ -67,7 +68,8 @@ if (MQTT) {
 	});
 
 	rl.on('line', function(line){
-		polyInt.parseIn(line, MQTT, servername);
+		var poly = new polyInt.poly()
+		poly.parseIn(message.toString(), client, servername)
 	})	
 }
 
