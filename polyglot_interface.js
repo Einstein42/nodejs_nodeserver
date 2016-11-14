@@ -2,8 +2,6 @@
 Parse and respond to Polyglot Interface using STDIN and STDOUT or MQTT
 */
 
-"use strict"
-
 var logger = require('./logger.js')
 var yaml = require('js-yaml')
 var fs = require('fs')
@@ -70,8 +68,6 @@ function Interface(callback) {
 	}
 	
 	Interface.prototype._recv = function(cmd) {
-		success = []
-		for(fun in self._handlers
 	}
 	
 // Message Constructor to parse inbound and format outbound communications to Polyglot	
@@ -90,9 +86,9 @@ function Interface(callback) {
 				else {
 					logger.debug('Property not found in input: ' + json)
 				}
-			} catch (e) {
-				console.error('Received badly formatted command (not json)')
-			}
+			}				
+		} catch (e) {
+				console.error('Received badly formatted command (not json):'+e)
 		}
 	}
 
@@ -143,6 +139,7 @@ function Interface(callback) {
 		var response = {'exit': {}}
 		messageConstructor._mk_cmd(response)
 		if (mqttc.client.connected) {
+			mqttc.client.publish('udi/polyglot/'+nodename+'/poly', JSON.stringify({'disconnected': {}}), { retain: true })
 			mqttc.client.end();		
 		}
 		process.exitCode = 0;
@@ -151,7 +148,6 @@ function Interface(callback) {
 	Message.prototype.config = function(data) {
 		logger.info('Received config from Polyglot')
 		self._read_nodeserver_config()
-		logger.info(nodeserver_config)
 	}
 
 	Message.prototype.install = function(data) {

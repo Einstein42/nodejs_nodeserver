@@ -5,8 +5,6 @@ Polyglot NodeServer Node.JS wrapper by Einstein.42(James Milne) milne.james@gmai
 This is the first Node.JS(or javascript) I've ever written so cut me a break.
 */
 
-"use strict"
-
 // Instantiate Global logger
 var logger = require('./logger.js');
 // Import polyglot interface handlers

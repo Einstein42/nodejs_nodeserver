@@ -2,8 +2,6 @@
 Instantiate the logger for all modules
 */
 
-"use strict"
-
 var logLevel = 'info';
 var winston = require('winston');
 var tsFormat = () => (new Date()).toLocaleString();

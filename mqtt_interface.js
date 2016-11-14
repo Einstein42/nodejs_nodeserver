@@ -2,8 +2,6 @@
 Handle MQTT Subsystem
 */
 
-"use strict"
-
 var logger = require('./logger.js');
 
 // MQTT SubSystem Interface
