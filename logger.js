@@ -1,6 +1,9 @@
 /*
 Instantiate the logger for all modules
 */
+
+"use strict"
+
 var logLevel = 'info';
 var winston = require('winston');
 var tsFormat = () => (new Date()).toLocaleString();
@@ -14,7 +17,7 @@ var winston = new (winston.Logger)({
 			maxFiles: 2,
 			handleExceptions: true,
 			humanReadableUnhandledException: true,
-			exitOnError: false,
+			exitOnError: true,
 			json: false
 		})
 	]
