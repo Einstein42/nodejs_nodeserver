@@ -14,5 +14,11 @@ var Polyglot = require('./polyglot_interface.js')
 
 
 new Polyglot.Connector(function (poly) {
-	logger.info(poly.nodename)
+	var nserver = new Polyglot.NodeServer(poly)
+	poly.connect()
+	logger.info('Ran connect')
+	nserver.setup()
+	logger.info('Ran setup')
+	nserver.run()
+	logger.info('Ran run')
 })

@@ -7,6 +7,187 @@ var yaml = require('js-yaml')
 var fs = require('fs')
 var path = require('path')
 
+function NodeServer(poly, shortpoll = 1, longpoll = 30) {
+	this.poly = poly
+	this.config = {}
+	this.running = false
+	this.shortpoll = shortpoll
+	this.longpoll = longpoll
+	this._is_node_server = true
+	this._seq = 1000
+	this._seq_cb = {}
+	var self = this
+	
+	
+	this.poly.listen('config', self.on_config)
+	this.poly.listen('install', self.on_install)
+	this.poly.listen('query', self.on_query)
+	this.poly.listen('status', self.on_status)
+	this.poly.listen('add_all', self.on_add_all)
+	this.poly.listen('added', self.on_added)
+	this.poly.listen('removed', self.on_removed)
+	this.poly.listen('renamed', self.on_renamed)
+	this.poly.listen('enabled', self.on_enabled)
+	this.poly.listen('disabled', self.on_disabled)
+	this.poly.listen('cmd', self.on_cmd)
+	this.poly.listen('exit', self.on_exit)
+	this.poly.listen('result', self.on_result)
+	this.poly.listen('statistics', self.on_statistics)
+	
+	NodeServer.prototype.setup = function() {
+	}
+
+	NodeServer.prototype.smsg = function (str) {
+		self.poly.send_error(str)
+	}
+
+	NodeServer.prototype.on_config = function (data) {
+		self.config = data
+		return true
+	}
+
+	NodeServer.prototype.on_install = function (data) {
+		return false
+	}
+	
+	NodeServer.prototype.on_query = function (node_address, request_id=null) {
+		return false
+	}
+	
+	NodeServer.prototype.on_status = function(node_address, request_id=null) {
+		return false
+	}
+
+	NodeServer.prototype.on_add_all = function(request_id=null) {
+		return false
+	}
+
+	NodeServer.prototype.on_added = function(node_address, node_def_id, primary_node_address, name) {
+		return false
+	}
+
+	NodeServer.prototype.on_removed = function(node_address) {
+		return false
+	}
+
+	NodeServer.prototype.on_renamed = function(node_address, name) {
+		return false
+	}
+
+	NodeServer.prototype.on_enabled = function(node_address) {
+		return false
+	}
+
+	NodeServer.prototype.on_disabled = function(node_address) {
+		return false
+	}
+
+	NodeServer.prototype.on_cmd = function(node_address, command, value=null, uom=null, request_id=null) {
+		return false
+	}
+
+	NodeServer.prototype.on_statistics = function() {
+		return true
+	}
+
+	NodeServer.prototype.on_exit = function() {
+		self.running = false
+		return true
+	}
+
+	NodeServer.prototype.on_result = function(seq, status_code, elapsed, text, retries) {
+		if (!seq in self._seq_cb) {
+			self.smsg('**ERROR: on_result: missing callback for seq='+seq)
+			return false
+		}
+		
+		data = {
+			seq: seq,
+			status_code: status_code,
+			elapsed: elapsed,
+			text: text,
+			retries: retries
+		}
+		var result = (self._seq_cb[seq][0])(data, self._seq_cb[seq][1])
+		self._seq_cb[seq] = null
+		delete self._seq_cb[seq]
+		return result
+	}
+
+	NodeServer.prototype.register_result_cb = function(func, data={}) {
+		self._seq++
+		s = self._seq
+		self._seq_cb[s] = [func, data]
+		return s
+	}
+	
+	NodeServer.prototype.add_node = function(node_address, node_def_id, node_primary_addr,
+									node_name, callback=null, timeout=null, data={}) {
+		var seq = null
+		if (callback !== null) {
+			seq = self.register_result_cb(callback, data={})
+		}
+		self.poly.add_node(node_address, node_def_id, node_primary_addr, node_name, timeout, seq)
+		return true
+	}
+	
+	NodeServer.prototype.report_status = function(node_address, driver_control, value, uom,
+										callback=null, timeout=null, data={}) {
+		seq = null
+		if (callback !== null) {
+			seq = self.register_result_cb(callback, data)
+		}
+		self.poly.report_status(node_address, driver_control, value, uom, timeout, seq)
+		return true
+	}
+	
+	NodeServer.prototype.restcall = function(api, callback=null, timeout=null, data={}) {
+		if (callback !== null) {
+			seq = self.register_result_cb(callback, data)
+		}
+		self.poly.restcall(api, timeout, seq)
+		return seq
+	}
+	
+	NodeServer.prototype.tock = function() {	
+	}
+
+	NodeServer.prototype.poll = function() {
+	}
+
+	NodeServer.prototype.long_poll = function() {
+	}
+
+	NodeServer.prototype.run = function() {
+		self.running = true
+		var scounter = 0
+		var lcounter = 0 
+		var tcounter = 0
+		var interval = setInterval(function () {
+			if(!self.running) {
+				clearInterval(interval)
+				logger.info('self.running turned false exiting.')
+				self.poly.exit()
+			}
+			scounter++
+			lcounter++
+			tcounter++
+			if(scounter >= self.shortpoll) {
+				self.poll()
+				scounter = 0
+			}
+			if(lcounter >= self.longpoll) {
+				self.long_poll()
+				lcounter = 0
+			}
+			if(tcounter >= 7) {
+				self.tock()
+				tcounter = 0
+			}
+		},1000)
+	}
+}
+
 function Connector(callback) {
     this.commands = ['config', 'install', 'query', 'status', 'add_all', 'added',
                 'removed', 'renamed', 'enabled', 'disabled', 'cmd', 'ping',
@@ -120,6 +301,14 @@ function Connector(callback) {
 		}
 	}
 
+	Connector.prototype.connect = function(data) {
+		//Todo integrate the readline functions here
+	}
+
+	Connector.prototype.disconnect = function(data) {
+		//Todo integrate the readline disconnect functions here
+	}
+
 	Connector.prototype.connected = function(data) {
 		logger.info('Polyglot MQTT Status: Connected')
 		self.polyglotconnected = true
@@ -229,7 +418,7 @@ function Connector(callback) {
 	}
 	
 	Connector.prototype.report_status = function(node_address, driver_control, value,
-												uom, timeout=null, seq=null) {
+												uom, timeout=null, seq=null)  {
 		var data = {
 			node_address: node_address,
 			driver_control: driver_control,
@@ -329,3 +518,4 @@ function stdioSubsystem (poly) {
 }
 
 module.exports.Connector = Connector
+module.exports.NodeServer = NodeServer
