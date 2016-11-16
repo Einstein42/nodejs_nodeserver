@@ -5,6 +5,7 @@ Handle MQTT Subsystem
 var logger = require('./logger.js');
 
 // MQTT SubSystem Interface
+// , nodename, mqtt_server, mqtt_port
 function mqttSubsystem(parent, nodename, mqtt_server, mqtt_port) {
 	var mqtt = require('mqtt')
 	var options = {
@@ -33,8 +34,7 @@ function mqttSubsystem(parent, nodename, mqtt_server, mqtt_port) {
 	})
 	this.client.on('message', (topic, message) => {
 		logger.info('MQTT Message: ' + topic + ": " + message.toString())
-		input = new parent.Message(true)
-		input.parseIn(message.toString())
+		parent.parseIn(true, message.toString())
 	})
 	this.client.on('reconnect', () => {
 		logger.info('MQTT attempting reconnection to broker...')

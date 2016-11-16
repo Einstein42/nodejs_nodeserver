@@ -5,7 +5,6 @@
     "executable": "nodetest.js",
     "description": "NodeJS Nodeserver for Polyglot by UDI",
     "notice": "",
-	"configfile": "config.yaml",
     "interface": "mqtt",
     "mqtt_server": "pi3",
     "mqtt_port": "1883",

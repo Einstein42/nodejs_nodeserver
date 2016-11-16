@@ -11,23 +11,8 @@ var logger = require('./logger.js');
 var Polyglot = require('./polyglot_interface.js')
 
 // Create Polyglot Interface object
-var poly = new Polyglot.Interface()
 
-// STDIN/STDOUT Interface
-function stdioSubsystem () {
-	var readline = require('readline');
 
-	var rl = readline.createInterface({
-	  input: process.stdin,
-	  output: process.stdout,
-	  terminal: false
-	});
-
-	rl.on('line', function(line){
-		input = new poly.Message(false)
-		input.parseIn(line.toString())
-	})	
-}
-
-stdioSubsystem()
-
+new Polyglot.Connector(function (poly) {
+	logger.info(poly.nodename)
+})
